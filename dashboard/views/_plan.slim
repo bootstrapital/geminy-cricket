@@ -1,0 +1,11 @@
+- if plan_items.empty?
+  p No plan items yet.
+- else
+  - plan_items.each do |item|
+    article
+      header
+        code = item["id"]
+      p = item["description"]
+      small
+        | Status:
+        = item["is_completed"] ? "completed" : "pending"

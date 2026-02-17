@@ -1,0 +1,26 @@
+- if run.nil?
+  p No active run yet.
+- else
+  article
+    header
+      strong Run:
+      code = run["id"]
+    p
+      strong Status:
+      = run["status"]
+    p
+      strong Agent:
+      = run["agent_id"]
+    p
+      strong Last heartbeat:
+      = run["last_heartbeat_at"]
+    p
+      strong Loop count:
+      = run["loop_count"] || 0
+    - if checkpoint
+      p
+        strong Last checkpoint:
+        = checkpoint["summary"]
+      small = checkpoint["created_at"]
+    - else
+      p No checkpoint yet.
