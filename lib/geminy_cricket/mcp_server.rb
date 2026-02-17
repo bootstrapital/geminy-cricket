@@ -484,7 +484,11 @@ module GeminyCricket
 
         JSON.parse(text)
       end
-    rescue JSON::ParserError
+    rescue JSON::ParserError => e
+      log_swallowed_error(
+        event: "mcp_parse_error",
+        exception: e
+      )
       :parse_error
     end
 
@@ -540,6 +544,16 @@ module GeminyCricket
       payload = JSON.generate(message)
       @io_out.write("Content-Length: #{payload.bytesize}\r\n\r\n#{payload}")
       @io_out.flush
+    end
+
+    def log_swallowed_error(event:, exception:)
+      warn(
+        JSON.generate(
+          event: event,
+          error_class: exception.class.name,
+          message: exception.message
+        )
+      )
     end
   end
 end

@@ -40,9 +40,9 @@ RSpec.describe GeminyCricket::Supervisor do
 
     context "gc_recall" do
       it "returns matches from the journal" do
-        supervisor.dispatch("gc_start", { "goal" => "Recall" })
+        start_result = supervisor.dispatch("gc_start", { "goal" => "Recall" })
         store.create_journal_entry(
-          session_id: supervisor.instance_variable_get(:@active_session_id),
+          session_id: start_result[:session_id],
           entry_type: "reasoning",
           content: "Secret code is 1234"
         )

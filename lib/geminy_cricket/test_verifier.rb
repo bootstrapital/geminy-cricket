@@ -29,6 +29,11 @@ module GeminyCricket
       result[:framework_used] = framework_used
       result
     rescue StandardError => e
+      log_swallowed_error(
+        event: "test_verifier_verify_failed",
+        exception: e,
+        extra: { scope: @scope.to_s, framework: @framework.to_s }
+      )
       {
         status: "error",
         summary: "Unable to run tests",
@@ -231,8 +236,25 @@ module GeminyCricket
         marker = (idx + 1 == line_no) ? ">" : " "
         format("%s %4d | %s", marker, idx + 1, lines[idx])
       end.join("\n")
-    rescue StandardError
+    rescue StandardError => e
+      log_swallowed_error(
+        event: "test_verifier_extract_snippet_failed",
+        exception: e,
+        extra: { file: file.to_s, line_no: line_no.to_i }
+      )
       nil
+    end
+
+    def log_swallowed_error(event:, exception:, extra: {})
+      warn(
+        JSON.generate(
+          {
+            event: event,
+            error_class: exception.class.name,
+            message: exception.message
+          }.merge(extra)
+        )
+      )
     end
   end
 end

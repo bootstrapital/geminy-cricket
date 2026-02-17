@@ -38,8 +38,18 @@ module GeminyCricket
 
       parsed.fetch("data")
     rescue JSON::ParserError => e
+      log_swallowed_error(
+        event: "client_invalid_json_response",
+        exception: e,
+        extra: { base_url: @base_url, tool: tool.to_s }
+      )
       raise Supervisor::ToolError.new("Invalid supervisor response JSON: #{e.message}", code: "server_error", retryable: true)
     rescue Errno::ECONNREFUSED, Errno::EPERM, Errno::EHOSTUNREACH, SocketError, Net::OpenTimeout, Net::ReadTimeout => e
+      log_swallowed_error(
+        event: "client_server_unreachable",
+        exception: e,
+        extra: { base_url: @base_url, tool: tool.to_s }
+      )
       raise Supervisor::ToolError.new(
         "Cannot reach Geminy Cricket server at #{@base_url}. Start with: bundle exec ruby bin/geminy-cricket-server",
         code: "server_unavailable",
@@ -60,8 +70,27 @@ module GeminyCricket
 
       parsed = JSON.parse(res.body)
       parsed["ok"] == true
-    rescue StandardError
+    rescue StandardError => e
+      log_swallowed_error(
+        event: "client_health_check_failed",
+        exception: e,
+        extra: { base_url: @base_url }
+      )
       false
+    end
+
+    private
+
+    def log_swallowed_error(event:, exception:, extra: {})
+      warn(
+        JSON.generate(
+          {
+            event: event,
+            error_class: exception.class.name,
+            message: exception.message
+          }.merge(extra)
+        )
+      )
     end
   end
 end

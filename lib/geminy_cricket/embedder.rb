@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "json"
+
 module GeminyCricket
   class Embedder
     def initialize(model: Config.embedding_model, dimensions: Config.embedding_dimensions)
@@ -33,7 +35,11 @@ module GeminyCricket
       return nil unless vector.length == @dimensions
 
       vector
-    rescue StandardError
+    rescue StandardError => e
+      log_swallowed_error(
+        event: "embedder_embed_failed",
+        exception: e
+      )
       nil
     end
 
@@ -53,6 +59,16 @@ module GeminyCricket
       return nil unless value.is_a?(Array)
 
       value.map(&:to_f)
+    end
+
+    def log_swallowed_error(event:, exception:)
+      warn(
+        JSON.generate(
+          event: event,
+          error_class: exception.class.name,
+          message: exception.message
+        )
+      )
     end
   end
 end

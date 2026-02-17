@@ -1,8 +1,24 @@
 # Geminy Cricket
 
-Geminy Cricket is a supervisor for coding agents. It persists plan/history, runs verification, supports semantic recall, and provides resumable run orchestration.
+**The Agent Supervisor Layer for Autonomous Development.**
+
+Geminy Cricket is the reliability control plane for coding agents. It provides the **Agent Supervisor Layer** that sits between an autonomous agent and your production codebase.
+
+Instead of just "running code," Geminy Cricket enforces a supervised loop:
+- **Durable State:** Persists plans, steps, and reasoning across sessions (DuckDB).
+- **Verification:** Normalizes test failures into compact "chirps" for efficient agent self-correction.
+- **Resumability:** Supports checkpoints, pause/resume, and context compaction for long-running tasks.
+- **Auditability:** Keeps a durable journal of every decision and outcome.
 
 For agent behavior policy and prompt guidance, see `AGENTS.md`.
+
+## Why Geminy Cricket?
+
+As agents move from "chat" to "autonomy," generation speed matters less than **supervision quality**.
+
+Geminy Cricket fills the gap between the Agent (which wants to go fast) and the Repository (which needs to stay safe). It acts as the "Flight Recorder" and "Mission Control" for the agent's inner loop, ensuring that even if the agent crashes or hallucinates, the *state of the work* is preserved and recoverable.
+
+## Architecture
 
 Default runtime model is single-owner: one supervisor server process owns DuckDB, and CLI/MCP clients call that process over HTTP.
 

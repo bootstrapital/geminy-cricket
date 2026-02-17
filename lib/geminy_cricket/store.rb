@@ -360,7 +360,11 @@ module GeminyCricket
             ON embeddings USING HNSW (vector)
             WITH (metric = 'cosine')
           SQL
-        rescue StandardError
+        rescue StandardError => e
+          log_swallowed_error(
+            event: "vss_index_create_skipped",
+            exception: e
+          )
           nil
         end
       end
@@ -372,7 +376,12 @@ module GeminyCricket
       return if existing.any? { |row| run_value(row, "name") == column_name }
 
       execute("ALTER TABLE #{table_name} ADD COLUMN #{column_definition}")
-    rescue StandardError
+    rescue StandardError => e
+      log_swallowed_error(
+        event: "ensure_column_failed",
+        exception: e,
+        extra: { table_name: table_name, column: column_name }
+      )
       nil
     end
 
@@ -383,6 +392,10 @@ module GeminyCricket
     rescue StandardError => e
       @vss_enabled = false
       @vss_error = e.message
+      log_swallowed_error(
+        event: "vss_bootstrap_failed",
+        exception: e
+      )
     end
 
     def index_entity(entity_type:, entity_id:, content:)
@@ -399,7 +412,12 @@ module GeminyCricket
       )
 
       true
-    rescue StandardError
+    rescue StandardError => e
+      log_swallowed_error(
+        event: "index_entity_failed",
+        exception: e,
+        extra: { entity_type: entity_type, entity_id: entity_id }
+      )
       false
     end
 
@@ -451,7 +469,11 @@ module GeminyCricket
         row["recall_score"] = row["semantic_score"].to_f.round(6)
         row["retrieval_rationale"] = "Matched semantic vector similarity"
       end
-    rescue StandardError
+    rescue StandardError => e
+      log_swallowed_error(
+        event: "semantic_recall_failed",
+        exception: e
+      )
       []
     end
 
@@ -518,7 +540,11 @@ module GeminyCricket
       return value if value.is_a?(Hash)
 
       JSON.parse(value)
-    rescue JSON::ParserError
+    rescue JSON::ParserError => e
+      log_swallowed_error(
+        event: "parse_json_failed",
+        exception: e
+      )
       {}
     end
 
@@ -597,6 +623,20 @@ module GeminyCricket
         )
       )
       raise
+    end
+
+    def log_swallowed_error(event:, exception:, extra: {})
+      warn(
+        JSON.generate(
+          {
+            event: event,
+            error_class: exception.class.name,
+            message: exception.message,
+            request_id: Thread.current[:gc_request_id],
+            thread_id: Thread.current.object_id
+          }.merge(extra)
+        )
+      )
     end
   end
 end

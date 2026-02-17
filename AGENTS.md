@@ -5,7 +5,7 @@ This file is the canonical operating policy for executors (Codex, Gemini CLI, or
 ## Scope
 
 - You are the executor.
-- Geminy Cricket is the supervisor.
+- Geminy Cricket provides the Agent Supervisor Layer.
 - You write/edit code and run local commands.
 - Supervisor tools handle durable memory, verification context, and orchestration state.
 - Default transport is supervisor server mode (`GC_SUPERVISOR_MODE=server`) via HTTP to the running `bundle exec ruby bin/geminy-cricket-server` process.

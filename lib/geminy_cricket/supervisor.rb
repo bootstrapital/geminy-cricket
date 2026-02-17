@@ -29,7 +29,6 @@ module GeminyCricket
 
     def initialize(store: Store.new)
       @store = store
-      @active_session_id = nil
     end
 
     def dispatch(tool, args = {})
@@ -92,11 +91,11 @@ module GeminyCricket
 
     def gc_start(goal)
       session = @store.create_session(goal: goal)
-      @active_session_id = session_value(session, "id")
+      session_id = session_value(session, "id")
 
       {
         tool: "gc_start",
-        session_id: @active_session_id,
+        session_id: session_id,
         goal: goal,
         dashboard_url: dashboard_url,
         message: "Session created. Start dashboard with: bundle exec ruby bin/geminy-cricket-server"
@@ -394,7 +393,6 @@ module GeminyCricket
       if run_id
         run = require_run(run_id)
         sid = session_value(run, "session_id")
-        @active_session_id = sid
         return {
           session_id: sid,
           resolution: {
@@ -408,7 +406,6 @@ module GeminyCricket
         session = @store.find_session(session_id)
         raise ToolError.new("Unknown session_id: #{session_id}", code: "not_found") unless session
 
-        @active_session_id = session_id
         return {
           session_id: session_id,
           resolution: {
@@ -422,13 +419,14 @@ module GeminyCricket
         raise ToolError.new("session_id or run_id is required", code: "invalid_arguments")
       end
 
-      @active_session_id ||= @store.latest_active_session&.dig("id") || @store.latest_active_session&.dig(:id)
-      unless @active_session_id
+      latest = @store.latest_active_session
+      latest_session_id = session_value(latest, "id")
+      unless latest_session_id
         raise ToolError.new("No active session. Run gc_start first.", code: "not_found")
       end
 
       {
-        session_id: @active_session_id,
+        session_id: latest_session_id,
         resolution: {
           mode: "legacy_latest_active_session",
           used_legacy_fallback: true
@@ -566,7 +564,11 @@ module GeminyCricket
       return value if value.is_a?(Hash)
 
       JSON.parse(value)
-    rescue JSON::ParserError
+    rescue JSON::ParserError => e
+      log_swallowed_error(
+        event: "supervisor_parse_json_failed",
+        exception: e
+      )
       {}
     end
 
@@ -574,6 +576,18 @@ module GeminyCricket
       return nil unless record
 
       record[key] || record[key.to_sym]
+    end
+
+    def log_swallowed_error(event:, exception:)
+      warn(
+        JSON.generate(
+          event: event,
+          error_class: exception.class.name,
+          message: exception.message,
+          request_id: Thread.current[:gc_request_id],
+          thread_id: Thread.current.object_id
+        )
+      )
     end
   end
 end

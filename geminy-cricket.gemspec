@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.name = "geminy-cricket"
   spec.version = GeminyCricket::VERSION
   spec.authors = ["Geminy Cricket Contributors"]
-  spec.summary = "Supervisor server for test-driven agent workflows"
+  spec.summary = "The Agent Supervisor Layer for Autonomous Development"
   spec.license = "MIT"
   spec.homepage = "https://github.com/bootstrapital/geminy-cricket"
   spec.required_ruby_version = ">= 3.3"
