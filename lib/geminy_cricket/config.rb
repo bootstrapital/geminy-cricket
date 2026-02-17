@@ -8,8 +8,19 @@ module GeminyCricket
       @root ||= File.expand_path("../..", __dir__)
     end
 
+    def project_root
+      @project_root ||= begin
+        curr = Dir.pwd
+        while curr != "/"
+          return curr if Dir.exist?(File.join(curr, ".git")) || Dir.exist?(File.join(curr, ".geminy-cricket"))
+          curr = File.dirname(curr)
+        end
+        Dir.pwd
+      end
+    end
+
     def db_path
-      ENV.fetch("GC_DB_PATH", File.join(root, "db", "geminy_cricket.duckdb"))
+      ENV.fetch("GC_DB_PATH", File.join(project_root, ".geminy-cricket", "supervisor.duckdb"))
     end
 
     def dashboard_port

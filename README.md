@@ -18,7 +18,19 @@ As agents move from "chat" to "autonomy," generation speed matters less than **s
 
 Geminy Cricket fills the gap between the Agent (which wants to go fast) and the Repository (which needs to stay safe). It acts as the "Flight Recorder" and "Mission Control" for the agent's inner loop, ensuring that even if the agent crashes or hallucinates, the *state of the work* is preserved and recoverable.
 
-## Architecture
+## Project Setup (Isolated Supervision)
+
+Geminy Cricket uses **Repository-Scoped Isolation**. Each project you supervise has its own private state.
+
+1.  **Initialize the project folder:**
+    ```bash
+    mkdir .geminy-cricket
+    ```
+2.  **Update your `.gitignore`:**
+    Add the supervisor state folder to your `.gitignore` to avoid committing binary DB files:
+    ```bash
+    echo ".geminy-cricket/" >> .gitignore
+    ```
 
 Default runtime model is single-owner: one supervisor server process owns DuckDB, and CLI/MCP clients call that process over HTTP.
 
