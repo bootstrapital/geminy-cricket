@@ -4,10 +4,12 @@ require "sinatra/base"
 require "json"
 require "rack/utils"
 require "securerandom"
+require "slim"
 
 module GeminyCricket
   class DashboardApp < Sinatra::Base
     set :views, File.expand_path("../../dashboard/views", __dir__)
+    set :slim, disable_escape: false
 
     class << self
       def store_instance
@@ -71,7 +73,7 @@ module GeminyCricket
       @entries = @session ? store.list_journal_entries(@session["id"]) : []
       @run = @session ? store.latest_run_for_session(@session["id"]) : nil
       @checkpoint = @run ? store.latest_checkpoint(@run["id"]) : nil
-      erb :index
+      slim :index
     end
 
     get "/health" do
@@ -144,14 +146,14 @@ module GeminyCricket
       content_type "text/html"
       session = store.latest_active_session
       entries = session ? store.list_journal_entries(session["id"]) : []
-      erb :_journal, locals: { entries: entries }
+      slim :_journal, layout: false, locals: { entries: entries }
     end
 
     get "/plan" do
       content_type "text/html"
       session = store.latest_active_session
       plan_items = session ? store.list_plan_items(session["id"]) : []
-      erb :_plan, locals: { plan_items: plan_items }
+      slim :_plan, layout: false, locals: { plan_items: plan_items }
     end
 
     get "/run" do
@@ -159,7 +161,7 @@ module GeminyCricket
       session = store.latest_active_session
       run = session ? store.latest_run_for_session(session["id"]) : nil
       checkpoint = run ? store.latest_checkpoint(run["id"]) : nil
-      erb :_run, locals: { run: run, checkpoint: checkpoint }
+      slim :_run, layout: false, locals: { run: run, checkpoint: checkpoint }
     end
   end
 end

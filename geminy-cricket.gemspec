@@ -16,9 +16,10 @@ Gem::Specification.new do |spec|
   spec.executables = ["geminy-cricket", "geminy-cricket-mcp", "geminy-cricket-server"]
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency "duckdb", "~> 1.1"
-  spec.add_runtime_dependency "informers", "~> 1.2"
+  spec.add_runtime_dependency "duckdb", "~> 1.4", ">= 1.4.3"
+  spec.add_runtime_dependency "informers", "~> 1.2", ">= 1.2.1"
   spec.add_runtime_dependency "puma", "~> 7.0"
   spec.add_runtime_dependency "rackup", "~> 2.0"
   spec.add_runtime_dependency "sinatra", "~> 4.0"
+  spec.add_runtime_dependency "slim", "~> 5.0"
 end

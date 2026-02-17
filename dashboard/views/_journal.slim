@@ -1,0 +1,9 @@
+- if entries.empty?
+  p No journal entries yet.
+- else
+  - entries.each do |entry|
+    article
+      header
+        strong = entry["entry_type"]
+        small = entry["timestamp"]
+      pre = entry["content"]

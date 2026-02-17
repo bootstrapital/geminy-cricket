@@ -35,6 +35,23 @@ RSpec.describe GeminyCricket::DashboardApp do
     end
   end
 
+  describe "dashboard template escaping" do
+    it "escapes journal content in rendered HTML" do
+      session = GeminyCricket::DashboardApp.store_instance.create_session(goal: "xss")
+      GeminyCricket::DashboardApp.store_instance.create_journal_entry(
+        session_id: session["id"],
+        entry_type: "test_failure",
+        content: "<script>alert('xss')</script>"
+      )
+
+      get "/journal"
+
+      expect(last_response).to be_ok
+      expect(last_response.body).to include("&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;")
+      expect(last_response.body).not_to include("<script>alert('xss')</script>")
+    end
+  end
+
   describe "POST /tool" do
     context "without auth" do
       before { ENV["GC_TOOL_API_KEY"] = nil }

@@ -1,9 +1,10 @@
 source "https://rubygems.org"
 
-gem "duckdb", ">= 1.1"
-gem "informers", ">= 1.2"
+gem "duckdb", "1.4.3.0"
+gem "informers", "1.2.1"
 gem "json"
 gem "sinatra", ">= 4.0"
+gem "slim"
 gem "rackup"
 gem "puma"
 

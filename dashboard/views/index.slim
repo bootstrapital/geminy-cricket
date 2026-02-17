@@ -1,0 +1,30 @@
+h1 Geminy Cricket
+
+- if @session
+  p
+    strong Session:
+    code = @session["id"]
+  p
+    strong Goal:
+    = @session["goal"]
+- else
+  p
+    | No active session yet. Run
+    code gc_start
+    | from the supervisor.
+
+.grid
+  section
+    h2 Run Status
+    #run hx-get="/run" hx-trigger="load, every 2s" hx-swap="innerHTML"
+      = slim :_run, layout: false, locals: { run: @run, checkpoint: @checkpoint }
+
+  section
+    h2 Plan
+    #plan hx-get="/plan" hx-trigger="load, every 2s" hx-swap="innerHTML"
+      = slim :_plan, layout: false, locals: { plan_items: @plan_items }
+
+  section
+    h2 Thinking Stream
+    #journal hx-get="/journal" hx-trigger="load, every 2s" hx-swap="innerHTML"
+      = slim :_journal, layout: false, locals: { entries: @entries }
