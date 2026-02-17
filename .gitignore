@@ -1,0 +1,43 @@
+# macOS
+.DS_Store
+
+# Ruby/Bundler
+.bundle/
+vendor/bundle/
+*.gem
+pkg/
+
+# Logs and temp files
+log/
+logs/
+tmp/
+*.log
+*.out
+
+# Test/coverage artifacts
+coverage/
+.rspec_status
+
+# DuckDB runtime files
+db/*.duckdb
+db/*.duckdb.wal
+db/*.db
+db/*.db.wal
+
+# Local env/config overrides
+.env
+.env.*
+!.env.example
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Local check outputs
+make-check*.txt
+
+# Internal planning docs
+planning/

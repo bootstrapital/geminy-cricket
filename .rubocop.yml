@@ -1,0 +1,63 @@
+AllCops:
+  TargetRubyVersion: 3.3
+  NewCops: disable
+  SuggestExtensions: false
+  Exclude:
+    - "vendor/**/*"
+    - "db/**/*"
+    - "tmp/**/*"
+
+# Keep lint useful without forcing broad style rewrites during beta hardening.
+Layout/LineLength:
+  Max: 140
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/ClassLength:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/StringLiterals:
+  Enabled: false
+
+Style/FormatStringToken:
+  Enabled: false
+
+Bundler/OrderedGems:
+  Enabled: false
+
+Style/GuardClause:
+  Enabled: false
+
+Style/HashTransformKeys:
+  Enabled: false
+
+Style/IfUnlessModifier:
+  Enabled: false
+
+Style/NumericLiterals:
+  Enabled: false
+
+Style/TernaryParentheses:
+  Enabled: false
+
+Style/WordArray:
+  Enabled: false

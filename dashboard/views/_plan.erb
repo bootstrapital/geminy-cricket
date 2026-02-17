@@ -1,0 +1,11 @@
+<% if plan_items.empty? %>
+  <p>No plan items yet.</p>
+<% else %>
+  <% plan_items.each do |item| %>
+    <article>
+      <header><code><%= item["id"] %></code></header>
+      <p><%= item["description"] %></p>
+      <small>Status: <%= item["is_completed"] ? "completed" : "pending" %></small>
+    </article>
+  <% end %>
+<% end %>

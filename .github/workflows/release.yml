@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - name: Verify tag matches version
+        run: |
+          set -euo pipefail
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          GEM_VERSION=$(ruby -e 'require_relative "lib/geminy_cricket/version"; puts GeminyCricket::VERSION')
+          if [ "$TAG_VERSION" != "$GEM_VERSION" ]; then
+            echo "Tag version ($TAG_VERSION) does not match gem version ($GEM_VERSION)"
+            exit 1
+          fi
+
+      - name: Run quality gates
+        env:
+          BUNDLE_AUDIT_STRICT: "true"
+        run: make check
+
+      - name: Build gem
+        run: gem build geminy-cricket.gemspec
+
+      - name: Publish to RubyGems
+        env:
+          RUBYGEMS_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.gem
+          cat > ~/.gem/credentials <<CREDS
+          ---
+          :rubygems_api_key: ${RUBYGEMS_API_KEY}
+          CREDS
+          chmod 0600 ~/.gem/credentials
+          GEM_FILE=$(ls geminy-cricket-*.gem | head -n1)
+          gem push "$GEM_FILE"

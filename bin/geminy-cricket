@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+$LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
+
+require "json"
+require "geminy_cricket"
+
+supervisor = GeminyCricket::SupervisorFactory.build
+
+if ARGV.include?("--help") || ARGV.include?("-h")
+  puts "Geminy Cricket CLI"
+  puts "Usage: echo '{\"tool\":\"gc_start\",\"args\":{\"goal\":\"...\"}}' | bin/geminy-cricket"
+  puts ""
+  puts "Environment Variables:"
+  puts "  GC_SUPERVISOR_MODE  (server|direct|auto) - Default: server"
+  puts "  GC_SERVER_URL       URL of the supervisor server"
+  puts "  GC_TOOL_API_KEY     API key for authentication"
+  exit 0
+end
+
+input = ARGF.read
+if input.strip.empty?
+  warn "Expected JSON input like: {\"tool\":\"gc_start\",\"args\":{\"goal\":\"...\"}}"
+  exit 1
+end
+
+begin
+  request = JSON.parse(input)
+  result = supervisor.dispatch(request.fetch("tool"), request.fetch("args", {}))
+  puts JSON.pretty_generate(result)
+rescue GeminyCricket::Supervisor::ToolError => e
+  warn(JSON.generate({ ok: false, error: e.to_h }))
+  exit 2
+end

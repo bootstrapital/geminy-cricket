@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+$LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
+
+require "rackup"
+require "geminy_cricket"
+
+host = GeminyCricket::Config.bind_host
+unless %w[127.0.0.1 localhost ::1].include?(host) || host.start_with?("127.")
+  if GeminyCricket::Config.tool_api_auth_required?
+    warn("[geminy-cricket] warning: binding to non-local host #{host} with API key auth enabled")
+  else
+    msg = "[geminy-cricket] refusing non-local bind without GC_TOOL_API_KEY (host=#{host})"
+    if GeminyCricket::Config.strict_bind_auth?
+      abort(msg)
+    else
+      warn("#{msg}; continuing because GC_STRICT_BIND_AUTH is false")
+    end
+  end
+end
+
+ENV["PUMA_MIN_THREADS"] ||= GeminyCricket::Config.puma_min_threads.to_s
+ENV["PUMA_MAX_THREADS"] ||= GeminyCricket::Config.puma_max_threads.to_s
+
+Rackup::Server.start(
+  app: GeminyCricket::DashboardApp,
+  Host: host,
+  Port: GeminyCricket::Config.dashboard_port,
+  environment: ENV.fetch("RACK_ENV", "development")
+)

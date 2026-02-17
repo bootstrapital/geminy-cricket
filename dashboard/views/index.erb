@@ -1,0 +1,31 @@
+<h1>Geminy Cricket</h1>
+
+<% if @session %>
+  <p><strong>Session:</strong> <code><%= @session["id"] %></code></p>
+  <p><strong>Goal:</strong> <%= @session["goal"] %></p>
+<% else %>
+  <p>No active session yet. Run <code>gc_start</code> from the supervisor.</p>
+<% end %>
+
+<div class="grid">
+  <section>
+    <h2>Run Status</h2>
+    <div id="run" hx-get="/run" hx-trigger="load, every 2s" hx-swap="innerHTML">
+      <%= erb :_run, locals: { run: @run, checkpoint: @checkpoint } %>
+    </div>
+  </section>
+
+  <section>
+    <h2>Plan</h2>
+    <div id="plan" hx-get="/plan" hx-trigger="load, every 2s" hx-swap="innerHTML">
+      <%= erb :_plan, locals: { plan_items: @plan_items } %>
+    </div>
+  </section>
+
+  <section>
+    <h2>Thinking Stream</h2>
+    <div id="journal" hx-get="/journal" hx-trigger="load, every 2s" hx-swap="innerHTML">
+      <%= erb :_journal, locals: { entries: @entries } %>
+    </div>
+  </section>
+</div>

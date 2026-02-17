@@ -1,0 +1,19 @@
+<% if run.nil? %>
+  <p>No active run yet.</p>
+<% else %>
+  <article>
+    <header>
+      <strong>Run:</strong> <code><%= run["id"] %></code>
+    </header>
+    <p><strong>Status:</strong> <%= run["status"] %></p>
+    <p><strong>Agent:</strong> <%= run["agent_id"] %></p>
+    <p><strong>Last heartbeat:</strong> <%= run["last_heartbeat_at"] %></p>
+    <p><strong>Loop count:</strong> <%= run["loop_count"] || 0 %></p>
+    <% if checkpoint %>
+      <p><strong>Last checkpoint:</strong> <%= checkpoint["summary"] %></p>
+      <small><%= checkpoint["created_at"] %></small>
+    <% else %>
+      <p>No checkpoint yet.</p>
+    <% end %>
+  </article>
+<% end %>
