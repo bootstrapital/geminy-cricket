@@ -462,33 +462,30 @@ module GeminyCricket
     end
 
     def read_message
-      header = +""
+      line = @io_in.gets
+      return :eof if line.nil?
 
-      loop do
-        line = @io_in.gets
-        return :eof if line.nil?
+      text = line.strip
+      return read_message if text.empty? # Skip empty lines
 
-        header << line
-        break if header.end_with?("\r\n\r\n") || header.end_with?("\n\n")
-      end
-
-      content_length = header[/Content-Length:\s*(\d+)/i, 1]
-      if content_length
-        body = @io_in.read(content_length.to_i)
+      if text.downcase.start_with?("content-length:")
+        # It's using headers
+        content_length = text[/\d+/].to_i
+        # Read the remaining header lines until the empty line
+        loop do
+          header_line = @io_in.gets
+          break if header_line.nil? || header_line.strip.empty?
+        end
+        body = @io_in.read(content_length)
         return :parse_error if body.nil? || body.empty?
 
         JSON.parse(body)
       else
-        text = header.strip
-        return :parse_error if text.empty?
-
+        # It's raw JSON
         JSON.parse(text)
       end
     rescue JSON::ParserError => e
-      log_swallowed_error(
-        event: "mcp_parse_error",
-        exception: e
-      )
+      log_swallowed_error(event: "mcp_parse_error", exception: e)
       :parse_error
     end
 
@@ -542,7 +539,8 @@ module GeminyCricket
 
     def write_message(message)
       payload = JSON.generate(message)
-      @io_out.write("Content-Length: #{payload.bytesize}\r\n\r\n#{payload}")
+      # warn(JSON.generate({ event: "mcp_writing_response", payload: payload }))
+      @io_out.puts(payload)
       @io_out.flush
     end
 
